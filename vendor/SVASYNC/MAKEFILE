@@ -1,0 +1,24 @@
+all: libsv.a term
+
+GCC=gcc -O3 -Wall -g
+
+libsv.a : svasync.o isr.o
+	ar -rs libsv.a svasync.o isr.o
+
+svasync.o : svasync.c
+	$(GCC) -c svasync.c
+
+isr.o : isr.S
+	$(GCC) -c isr.S
+
+term : term.o libsv.a
+	$(GCC) term.o libsv.a -o term -lpc
+
+term.o : term.c
+	$(GCC) -c term.c
+
+clean :
+	del *.o
+	del libsv.a
+	del term.
+	del term.exe

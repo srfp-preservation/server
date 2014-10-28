@@ -1,6 +1,6 @@
-# SRTP Server for DOS
+# SRFP Server for DOS
 
-A SRTP server, written in C, for 32-bit DOS machines.
+A SRFP server, written in C, for 32-bit DOS machines.
 
 ## Building
 

@@ -52,7 +52,6 @@ void destroy_message(srfp_message m){
 
 int main(){
 	printf("Hello! Now try writing to serial.\n");
-	printf("uint8_t: %d uint16_t: %d uint32_t: %d\n", sizeof(uint8_t), sizeof(uint16_t), sizeof(uint32_t));
 
 	if (SVAsyncInit(COM1)){
 		printf("Error initialising COM1.\n");

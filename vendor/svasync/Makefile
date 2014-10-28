@@ -1,9 +1,11 @@
 all: libsv.a term
 
-GCC=gcc -O3 -Wall -g
+GCC=i586-pc-msdosdjgpp-gcc -O3 -Wall -g
+AR=i586-pc-msdosdjgpp-ar
+DEL=rm
 
 libsv.a : svasync.o isr.o
-	ar -rs libsv.a svasync.o isr.o
+	$(AR) -rs libsv.a svasync.o isr.o
 
 svasync.o : svasync.c
 	$(GCC) -c svasync.c
@@ -18,7 +20,7 @@ term.o : term.c
 	$(GCC) -c term.c
 
 clean :
-	del *.o
-	del libsv.a
-	del term.
-	del term.exe
+	$(DEL) *.o
+	$(DEL) libsv.a
+	$(DEL) term.
+	$(DEL) term.exe

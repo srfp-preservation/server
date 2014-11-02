@@ -12,6 +12,16 @@ typedef struct {
 	uint32_t checksum;
 } srfp_message;
 
+#pragma pack(push, 1)
+typedef struct {
+	uint8_t flags;
+	uint32_t size;
+	uint32_t created_time;
+	uint32_t accessed_time;
+	uint32_t modified_time;
+} srfp_node_info;
+#pragma pack(pop)
+
 void serial_read(void *buf, size_t length){
 	uint8_t *buffer = (uint8_t *) buf;
 	size_t i;

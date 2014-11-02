@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <mntent.h>
+#include <utime.h>
 #include "vendor/svasync/svasync.h"
 #include "message.c"
 #include "util.c"
@@ -54,6 +55,30 @@ void do_directory_list(srfp_message *request, srfp_message *response){
 	}
 }
 
+void do_node_info(srfp_message *request, srfp_message *response){
+	char path[request->header.length + 1];
+	srfp_node_info out;
+	bzero(&out, sizeof(out));
+	srfp_to_dos_path(request->body, request->header.length, path);
+	// TODO: account for case where file doesn't exist
+
+	// if it's a regular file (not a folder), set flags to 0x01
+	if (access(path, D_OK)){
+		out.flags = 0x01;
+	}
+
+	// get modification and (if supported) access time
+	struct utimbuf timeinfo;
+	if (utime(path, &timeinfo) == 0){
+		out.accessed_time = htons(timeinfo.actime);
+		out.modified_time = htons(timeinfo.modtime);
+	}
+
+	response->body = malloc(sizeof(out));
+	response->header.length = sizeof(out);
+	memcpy(response->body, &out, sizeof(out));
+}
+
 void do_version(srfp_message *request, srfp_message *response){
 	response->body = malloc(3);
 	memcpy(response->body, "\0\0\0", 3);
@@ -82,6 +107,7 @@ int main(){
 				do_directory_list(&request, &response);
 				break;
 			case 0x02: //NodeInfo
+				do_node_info(&request, &response);
 				break;
 			case 0x03: //FileContents
 				break;

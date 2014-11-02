@@ -8,7 +8,7 @@ typedef struct {
 
 typedef struct {
 	srfp_header header;
-	uint8_t* body;
+	char* body;
 	uint32_t checksum;
 } srfp_message;
 
@@ -38,4 +38,12 @@ srfp_message get_message(){
 
 void destroy_message(srfp_message m){
 	free(m.body);
+}
+
+srfp_message response_from_request(srfp_message req){
+	srfp_message resp;
+	bzero(&resp, sizeof(resp));
+	resp.header.type = req.header.type;
+	resp.header.msgid = req.header.msgid;
+	return resp;
 }

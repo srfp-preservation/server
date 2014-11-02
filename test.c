@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include "vendor/svasync/svasync.h"
 #include "message.c"
+#include "util.c"
 
 int main(){
 	printf("Hello! Now try writing to serial.\n");
@@ -23,16 +24,40 @@ int main(){
 	SVAsyncHand(DTR | RTS);
 
 	while (1){
-		srfp_message message = get_message();
+		srfp_message request = get_message();
+		srfp_message response = response_from_request(request);
 
-		printf("MessageType 0x%02x, ID %d, length %d\n", message.header.type, message.header.msgid, message.header.length);
+		switch (request.header.type){
+			case 0x01: //DirectoryList
+				break;
+			case 0x02: //NodeInfo
+				break;
+			case 0x03: //FileContents
+				break;
+			case 0x7F: { //Version
+				response.body = malloc(3);
+				memcpy(response.body, "\0\0\0", 3);
+				response.header.length = 3;
+				break;
+			}
+		}
+
+		printf("MessageType 0x%02x, ID %d, length %d\n", request.header.type, request.header.msgid, request.header.length);
 
 		uint32_t i;
-		for (i = 0; i < message.header.length; i++){
-			printf("%02x ", message.body[i]);
+		for (i = 0; i < request.header.length; i++){
+			printf("%02x ", request.body[i]);
 		}
-		printf("\nChecksum 0x%08x\n", message.checksum);
-		destroy_message(message);
+		printf("\nChecksum 0x%08x\n", request.checksum);
+		printf("MessageType 0x%02x, ID %d, length %d\n", response.header.type, response.header.msgid, response.header.length);
+
+		for (i = 0; i < response.header.length; i++){
+			printf("%02x ", response.body[i]);
+		}
+		printf("\nChecksum 0x%08x\n", response.checksum);
+
+		destroy_message(request);
+		destroy_message(response);
 	}
 
 	return 0;

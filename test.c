@@ -79,6 +79,35 @@ void do_node_info(srfp_message *request, srfp_message *response){
 	memcpy(response->body, &out, sizeof(out));
 }
 
+void do_file_contents(srfp_message *request, srfp_message *response){
+	srfp_file_contents_info info;
+	memcpy(&info, request->body, sizeof(info));
+	info.length = ntohl(info.length);
+	info.offset = ntohl(info.offset);
+	size_t body_len = request->header.length - sizeof(info);
+	char path[body_len + 1];
+	srfp_to_dos_path(request->body + sizeof(info), body_len, path);
+
+	int fd = open(path, O_RDONLY | O_BINARY);
+	if (fd < 0){
+		printf("Couldn't open file %s", path);
+		perror("");
+		return;
+	}
+	lseek(fd, info.offset, SEEK_SET);
+
+	response->body = malloc(info.length);
+	ssize_t amount_read;
+	if ((amount_read = read(fd, response->body, info.length)) < 0){
+		printf("Couldn't read file %s", path);
+		perror("");
+	} else {
+		response->header.length = amount_read;
+	}
+	close(fd);
+
+}
+
 void do_version(srfp_message *request, srfp_message *response){
 	response->body = malloc(3);
 	memcpy(response->body, "\0\0\0", 3);
@@ -110,6 +139,7 @@ int main(){
 				do_node_info(&request, &response);
 				break;
 			case 0x03: //FileContents
+				do_file_contents(&request, &response);
 				break;
 			case 0x7F: { //Version
 				do_version(&request, &response);

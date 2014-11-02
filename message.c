@@ -20,6 +20,11 @@ typedef struct {
 	uint32_t accessed_time;
 	uint32_t modified_time;
 } srfp_node_info;
+
+typedef struct {
+	uint32_t offset;
+	uint32_t length;
+} srfp_file_contents_info;
 #pragma pack(pop)
 
 void serial_read(void *buf, size_t length){

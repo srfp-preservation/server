@@ -10,6 +10,13 @@
 #include "message.c"
 #include "util.c"
 
+
+void do_version(srfp_message *request, srfp_message *response){
+	response->body = malloc(3);
+	memcpy(response->body, "\0\0\0", 3);
+	response->header.length = 3;
+}
+
 int main(){
 	printf("Hello! Now try writing to serial.\n");
 
@@ -35,9 +42,7 @@ int main(){
 			case 0x03: //FileContents
 				break;
 			case 0x7F: { //Version
-				response.body = malloc(3);
-				memcpy(response.body, "\0\0\0", 3);
-				response.header.length = 3;
+				do_version(&request, &response);
 				break;
 			}
 		}

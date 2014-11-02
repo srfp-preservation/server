@@ -37,6 +37,16 @@ void serial_read(void *buf, size_t length){
 	}
 }
 
+void serial_write(void *buf, size_t length){
+	uint8_t *buffer = (uint8_t *) buf;
+	size_t i;
+	for (i = 0; i < length;){
+		if (SVAsyncOutStat()) continue;
+		SVAsyncOut(buffer[i]);
+		i++;
+	}
+}
+
 srfp_message get_message(){
 	srfp_message message;
 	bzero(&message, sizeof(message));
@@ -49,6 +59,16 @@ srfp_message get_message(){
 	message.checksum = ntohl(message.checksum);
 
 	return message;
+}
+
+void send_message(srfp_message message){
+	uint16_t length = message.header.length; // hang on to this in host byte order
+	message.header.msgid = htons(message.header.msgid);
+	message.header.length = htons(message.header.length);
+	serial_write(&message.header, sizeof(message.header));
+	serial_write(message.body, length);
+	message.checksum = htonl(message.checksum);
+	serial_write(&message.checksum, sizeof(message.checksum));
 }
 
 void destroy_message(srfp_message m){

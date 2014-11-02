@@ -161,6 +161,7 @@ int main(){
 		}
 		printf("\nChecksum 0x%08x\n", response.checksum);
 
+		send_message(response);
 		destroy_message(request);
 		destroy_message(response);
 	}

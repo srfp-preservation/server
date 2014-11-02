@@ -70,8 +70,8 @@ void do_node_info(srfp_message *request, srfp_message *response){
 	// get modification and (if supported) access time
 	struct utimbuf timeinfo;
 	if (utime(path, &timeinfo) == 0){
-		out.accessed_time = htons(timeinfo.actime);
-		out.modified_time = htons(timeinfo.modtime);
+		out.accessed_time = htonl(timeinfo.actime);
+		out.modified_time = htonl(timeinfo.modtime);
 	}
 
 	response->body = malloc(sizeof(out));

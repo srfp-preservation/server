@@ -2,7 +2,7 @@ all: libsv.a term
 
 GCC=i586-pc-msdosdjgpp-gcc -O3 -Wall -g
 AR=i586-pc-msdosdjgpp-ar
-DEL=rm
+DEL=rm -f
 
 libsv.a : svasync.o isr.o
 	$(AR) -rs libsv.a svasync.o isr.o

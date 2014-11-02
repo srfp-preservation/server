@@ -6,3 +6,7 @@ copy: test.exe
 
 vendor/svasync/libsv.a:
 	cd vendor/svasync; make libsv.a
+
+clean:
+	rm -f test.exe
+	cd vendor/svasync; make clean

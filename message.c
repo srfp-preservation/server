@@ -78,7 +78,7 @@ void destroy_message(srfp_message m){
 srfp_message response_from_request(srfp_message req){
 	srfp_message resp;
 	bzero(&resp, sizeof(resp));
-	resp.header.type = req.header.type;
+	resp.header.type = req.header.type + 0x80;
 	resp.header.msgid = req.header.msgid;
 	return resp;
 }

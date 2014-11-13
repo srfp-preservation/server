@@ -1,4 +1,4 @@
-test.exe: test.c vendor
+test.exe: test.c vendor/svasync/libsv.a
 	i586-pc-msdosdjgpp-gcc -Wall -otest.exe test.c vendor/svasync/libsv.a
 
 copy: test.exe

@@ -82,3 +82,10 @@ srfp_message response_from_request(srfp_message req){
 	resp.header.msgid = req.header.msgid;
 	return resp;
 }
+
+void make_error(srfp_message *resp, uint8_t error_num){
+	resp->header.type = 0x80;
+	resp->header.length = 1;
+	resp->body = malloc(1);
+	memcpy(resp->body, &error_num, 1);
+}

@@ -10,6 +10,8 @@
 #include <dirent.h>
 #include <mntent.h>
 #include <utime.h>
+#include <io.h>
+#include <errno.h>
 #include "vendor/svasync/svasync.h"
 #include "message.c"
 #include "util.c"
@@ -32,12 +34,12 @@ void do_directory_list(srfp_message *request, srfp_message *response){
 	} else {
 		char path[request->header.length + 1];
 		srfp_to_dos_path(request->body, request->header.length, path);
-		response->body = malloc(65535);
-		response->header.length = 0;
 		DIR *dir = opendir(path);
 		if (dir){
 			struct dirent *entry;
 			uint8_t i;
+			response->body = malloc(65535);
+			response->header.length = 0;
 			while (entry = readdir(dir)){
 				for (i = 0;;i++){
 					response->body[response->header.length] = entry->d_name[i];
@@ -49,8 +51,13 @@ void do_directory_list(srfp_message *request, srfp_message *response){
 			if (response->header.length) response->header.length--;
 			closedir(dir);
 		} else {
-			printf("Couldn't open directory %s", path);
-			perror("");
+			if (errno == ENOENT){
+				make_error(response, 0x01);
+			} else {
+				printf("Couldn't open directory %s to list: ", path);
+				perror("");
+				make_error(response, 0xFF);
+			}
 		}
 	}
 }
@@ -65,6 +72,29 @@ void do_node_info(srfp_message *request, srfp_message *response){
 	// if it's a regular file (not a folder), set flags to 0x01
 	if (access(path, D_OK)){
 		out.flags = 0x01;
+		// get its size while we're here
+		int fd = open(path, O_RDONLY);
+		if (fd < 0){
+			if (errno == ENOENT){
+				make_error(response, 0x01);
+			} else {
+				printf("Couldn't open file %s to get size: ", path);
+				perror("");
+				make_error(response, 0xFF);
+			}
+			return;
+		} else {
+			long length = filelength(fd);
+			if (length < 0){
+				printf("Couldn't get length of %s", path);
+				perror("");
+				make_error(response, 0xFF);
+				return;
+			} else {
+				out.size = htonl((uint32_t) filelength(fd));
+			}
+			close(fd);
+		}
 	}
 
 	// get modification and (if supported) access time
@@ -90,8 +120,13 @@ void do_file_contents(srfp_message *request, srfp_message *response){
 
 	int fd = open(path, O_RDONLY | O_BINARY);
 	if (fd < 0){
-		printf("Couldn't open file %s", path);
-		perror("");
+		if (errno == ENOENT){
+			make_error(response, 0x01);
+		} else {
+			printf("Couldn't open file %s to read: ", path);
+			perror("");
+			make_error(response, 0xFF);
+		}
 		return;
 	}
 	lseek(fd, info.offset, SEEK_SET);
@@ -99,8 +134,10 @@ void do_file_contents(srfp_message *request, srfp_message *response){
 	response->body = malloc(info.length);
 	ssize_t amount_read;
 	if ((amount_read = read(fd, response->body, info.length)) < 0){
-		printf("Couldn't read file %s", path);
+		printf("Couldn't read file %s: ", path);
 		perror("");
+		make_error(response, 0xFF);
+		return;
 	} else {
 		response->header.length = amount_read;
 	}
@@ -146,13 +183,14 @@ int main(){
 				break;
 			}
 		}
-
+		/*
 		printf("MessageType 0x%02x, ID %d, length %d\n", request.header.type, request.header.msgid, request.header.length);
 
 		uint32_t i;
 		for (i = 0; i < request.header.length; i++){
 			printf("%02x ", request.body[i]);
 		}
+
 		printf("\nChecksum 0x%08x\n", request.checksum);
 		printf("MessageType 0x%02x, ID %d, length %d\n", response.header.type, response.header.msgid, response.header.length);
 
@@ -160,7 +198,7 @@ int main(){
 			printf("%02x ", response.body[i]);
 		}
 		printf("\nChecksum 0x%08x\n", response.checksum);
-
+		*/
 		send_message(response);
 		destroy_message(request);
 		destroy_message(response);

@@ -2,17 +2,13 @@
 
 A SRFP server, written in C, for 32-bit DOS machines.
 
-## Building
+## Installation and Usage
 
-In order to build, you will need to download DJGPP, which can be downloaded from [GitHub Releases](https://github.com/andrewwutw/build-djgpp/releases), and make sure the directory containing the `i586-pc-msdosdjgpp-gcc` binary is on your `$PATH`.
+Download the latest version of `SRFP.EXE` from the [Releases page](https://github.com/srfp-preservation/server/releases).
 
-Then, simply type `make`.
+You will also need a DPMI server, such as CSDPMI. Download `csdpmi4b.zip` (you can get it from a number of sources, including [here](ftp://ftp.pl.freebsd.org/vol/rzm1/coast/vendors/djgpp/v2misc/csdpmi4b.zip)), and extract the `CWSDPMI.EXE` file.
 
-## Running
-
-To run binaries compiled with DJGPP, your target machine needs a DPMI server. Download `csdpmi4b.zip` (you can get it from a number of sources, including [here](ftp://ftp.pl.freebsd.org/vol/rzm1/coast/vendors/djgpp/v2misc/csdpmi4b.zip)), and extract the `CWSDPMI.EXE` file.
-
-Copy `SRFP.EXE` and `CWSDPMI.EXE` to your DOS machine. Connect the modern machine to `COM1`, and run `SRFP`.
+Copy `SRFP.EXE` and `CWSDPMI.EXE` to your DOS machine (they need to be in the same directory). Connect the modern machine to `COM1` via null modem cable, and run `SRFP`.
 
 ### Running in Virtualbox
 
@@ -21,6 +17,12 @@ To run the SRFP server in Virtualbox, you'll need to set up a DOS virtual machin
 This will create a Unix domain socket for your client to connect to at the path you specified.
 
 Finally, copy the files onto a floppy drive image, and mount it in Virtualbox.
+
+## Building from Source
+
+In order to build, you will need to download DJGPP, which can be downloaded from [GitHub Releases](https://github.com/andrewwutw/build-djgpp/releases), and make sure the directory containing the `i586-pc-msdosdjgpp-gcc` binary is on your `$PATH`.
+
+Then, simply type `make`.
 
 ## Contributors and Licensing
 

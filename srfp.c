@@ -16,6 +16,10 @@
 #include "message.c"
 #include "util.c"
 
+#define VERSION "1.0.0"
+#define PROTO_VERSION "1.0.1"
+#define PROTO_VERSION_BYTES "\x01\x00\x01"
+
 void do_directory_list(srfp_message *request, srfp_message *response){
 	if (request->header.length == 0){
 		// Empty request body means we need to list available volumes
@@ -147,12 +151,12 @@ void do_file_contents(srfp_message *request, srfp_message *response){
 
 void do_version(srfp_message *request, srfp_message *response){
 	response->body = malloc(3);
-	memcpy(response->body, "\0\0\0", 3);
+	memcpy(response->body, PROTO_VERSION_BYTES, 3);
 	response->header.length = 3;
 }
 
 int main(){
-	printf("Hello! Now try writing to serial.\n");
+	printf("SRFP Server version %s (protocol version %s)\n", VERSION, PROTO_VERSION);
 
 	if (SVAsyncInit(COM1)){
 		printf("Error initialising COM1.\n");
